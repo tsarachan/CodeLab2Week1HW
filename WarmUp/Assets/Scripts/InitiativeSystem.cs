@@ -1,4 +1,17 @@
-﻿using UnityEngine;
+﻿/*
+ * This script contains the main game logic
+ * Players are either in the "can act" or "can't act" state
+ * When a player can act, the game listens for her inputs
+ * Upon input, three things happen:
+ * 1. The player enters the "can't act" state
+ * 2. Any damage caused by the attack is inflicted on the other player
+ * 3. The initiative list is updated
+ * 
+ * Whichever player is next in the initiative list is then put into the "can act" state
+ * 
+ */
+
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -36,7 +49,8 @@ public class InitiativeSystem : MonoBehaviour {
 	public float fastMultiplier = 1.0f;
 	public float trickyMultiplier = 0.0f;
 
-
+	bool gameOver = false;
+	public bool GameOver { get; set; }
 
 	void Start()
 	{
@@ -58,10 +72,11 @@ public class InitiativeSystem : MonoBehaviour {
 
 	void Update()
 	{
-		if (p1CanAct) { ListenForInput(1); }
-		if (p2CanAct) { ListenForInput(2); }
-
-		//TowardNextInitStep();
+		if (!GameOver)
+		{
+			if (p1CanAct) { ListenForInput(1); }
+			if (p2CanAct) { ListenForInput(2); }
+		}
 	}
 
 	void ListenForInput(int playerNum)
@@ -221,17 +236,6 @@ public class InitiativeSystem : MonoBehaviour {
 			initList.GetChild(i).transform.localPosition = new Vector3(INIT_X_POS,
 																	   INIT_Y_START_POS + i,
 																	   INIT_Z_POS);
-		}
-	}
-
-	void TowardNextInitStep()
-	{
-		timer += Time.deltaTime;
-
-		if (timer >= initStepDuration)
-		{
-			ResolveNextInit();
-			timer = 0.0f;
 		}
 	}
 

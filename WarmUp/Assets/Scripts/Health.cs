@@ -29,8 +29,7 @@ public class Health : MonoBehaviour {
 
 	void LoseGame()
 	{
-		Time.timeScale = 0.0f;
-		Time.fixedDeltaTime = 0.0f;
+		transform.root.GetComponent<InitiativeSystem>().GameOver = true;
 
 		StartCoroutine(GameEnd());
 	}
