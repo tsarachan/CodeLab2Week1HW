@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -16,6 +17,8 @@ public class InitiativeSystem : MonoBehaviour {
 
 	bool p1CanAct = true;
 	bool p2CanAct = true;
+	Image p1ReadyImage;
+	Image p2ReadyImage;
 
 	Health p1Health;
 	Health p2Health;
@@ -39,6 +42,11 @@ public class InitiativeSystem : MonoBehaviour {
 	{
 		p1InitSymbol = Resources.Load("Prefabs/Green") as GameObject;
 		p2InitSymbol = Resources.Load("Prefabs/Yellow") as GameObject;
+
+		p1ReadyImage = transform.root.Find("Players").Find("Player 1").Find("Health meter").Find("Ready image")
+			.GetComponent<Image>();
+		p2ReadyImage = transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Ready image")
+			.GetComponent<Image>();
 
 		p1Health = transform.root.Find("Players").Find("Player 1").Find("Health meter").Find("Health image")
 			.GetComponent<Health>();
@@ -65,19 +73,19 @@ public class InitiativeSystem : MonoBehaviour {
 				{
 					InflictDamage(1, 2, strongMultiplier);
 					AddInitSymbol(1, "Strong");
-					p1CanAct = false;
+					SetReadiness(1, false);
 				}
 				else if (Input.GetKeyDown(p1Fast))
 				{
 					InflictDamage(1, 2, fastMultiplier);
 					AddInitSymbol(1 , "Fast");
-					p1CanAct = false;
+					SetReadiness(1, false);
 				}
 				else if (Input.GetKeyDown(p1Tricky))
 				{
 					TrickyEffects(1, 2, trickyMultiplier);
 					AddInitSymbol(1, "Tricky");
-					p1CanAct = false;
+					SetReadiness(1, false);
 				}
 				break;
 			case 2:
@@ -85,19 +93,19 @@ public class InitiativeSystem : MonoBehaviour {
 				{
 					InflictDamage(2, 1, strongMultiplier);
 					AddInitSymbol(2, "Strong");
-					p2CanAct = false;
+					SetReadiness(2, false);
 				}
 				else if (Input.GetKeyDown(p2Fast))
 				{
 					InflictDamage(2, 1, fastMultiplier);
 					AddInitSymbol(2, "Fast");
-					p2CanAct = false;
+					SetReadiness(2, false);
 				}
 				else if (Input.GetKeyDown(p2Tricky))
 				{
 					TrickyEffects(2, 1, trickyMultiplier);
 					AddInitSymbol(2, "Tricky");
-					p2CanAct = false;
+					SetReadiness(2, false);
 				}
 				break;
 			default:
@@ -112,11 +120,11 @@ public class InitiativeSystem : MonoBehaviour {
 		{
 			case 1:
 				p2Health.HealthFill -= baseDamage * multiplier;
-				p1CanAct = false;
+				SetReadiness(1, false);
 				break;
 			case 2:
 				p1Health.HealthFill -= baseDamage * multiplier;
-				p2CanAct = false;
+				SetReadiness(2, false);
 				break;
 			default:
 				Debug.Log("Illegal attacker: " + attacker);
@@ -129,11 +137,11 @@ public class InitiativeSystem : MonoBehaviour {
 		switch (attacker)
 		{
 			case 1:
-				p1CanAct = false;
+				SetReadiness(1, false);
 				GoToEndOfLine("Yellow");
 				break;
 			case 2:
-				p2CanAct = false;
+				SetReadiness(2, false);
 				GoToEndOfLine("Green");
 				break;
 			default:
@@ -225,9 +233,27 @@ public class InitiativeSystem : MonoBehaviour {
 	//then clear the symbol
 	void ResolveNextInit()
 	{
-		if (initList.GetChild(0).name.Contains("Green")) { p1CanAct = true; }
-		else if (initList.GetChild(0).name.Contains("Yellow")) { p2CanAct = true; }
+		if (initList.GetChild(0).name.Contains("Green")) { SetReadiness(1, true); }
+		else if (initList.GetChild(0).name.Contains("Yellow")) { SetReadiness(2, true); }
 
 		Destroy(initList.GetChild(0).gameObject);
+	}
+
+	void SetReadiness(int player, bool state)
+	{
+		switch (player)
+		{
+			case 1:
+				p1CanAct = state;
+				p1ReadyImage.enabled = state;
+				break;
+			case 2:
+				p2CanAct = state;
+				p2ReadyImage.enabled = state;
+				break;
+			default:
+				Debug.Log("Illegal player: " + player);
+				break;
+		}
 	}
 }
