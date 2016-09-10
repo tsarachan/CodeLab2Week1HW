@@ -233,10 +233,13 @@ public class InitiativeSystem : MonoBehaviour {
 	//then clear the symbol
 	void ResolveNextInit()
 	{
-		if (initList.GetChild(0).name.Contains("Green")) { SetReadiness(1, true); }
-		else if (initList.GetChild(0).name.Contains("Yellow")) { SetReadiness(2, true); }
+		if (initList.childCount > 0)
+		{
+			if (initList.GetChild(0).name.Contains("Green")) { SetReadiness(1, true); }
+			else if (initList.GetChild(0).name.Contains("Yellow")) { SetReadiness(2, true); }
 
-		Destroy(initList.GetChild(0).gameObject);
+			Destroy(initList.GetChild(0).gameObject);
+		}
 	}
 
 	void SetReadiness(int player, bool state)
