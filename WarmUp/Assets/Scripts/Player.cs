@@ -115,7 +115,6 @@ public class Player : MonoBehaviour {
 		{
 			if (initiative[0] == 1) { canAttack = true; }
 
-			Debug.Log("Removing initiative[0]: " + initiative[0].ToString());
 			initiative.RemoveAt(0);
 		}
 	}
@@ -150,7 +149,6 @@ public class Player : MonoBehaviour {
 		
 			initiative.Add(2);
 			PostAttackReset();
-			Debug.Log("strong detected");
 		}
 		else if (Input.GetKeyDown(fast))
 		{
