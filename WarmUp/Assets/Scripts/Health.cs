@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.Collections;
 
 public class Health : MonoBehaviour {
 
 	Image healthImage;
+
+	public float gameEndDelay = 2.0f;
 
 	float healthFill = 1.0f;
 	public float HealthFill
@@ -14,7 +17,8 @@ public class Health : MonoBehaviour {
 		{
 			healthFill = value;
 			healthImage.fillAmount = healthFill;
-			if (healthFill == 0.0f) { LoseGame(); }
+			Debug.Log(healthFill);
+			if (healthFill <= 0.0f) { LoseGame(); }
 		}
 	}
 
@@ -25,6 +29,16 @@ public class Health : MonoBehaviour {
 
 	void LoseGame()
 	{
-		//do something
+		Time.timeScale = 0.0f;
+		Time.fixedDeltaTime = 0.0f;
+
+		StartCoroutine(GameEnd());
+	}
+
+	IEnumerator GameEnd()
+	{
+		yield return StartCoroutine(CoroutineUtil.WaitForRealSeconds(gameEndDelay));
+
+		SceneManager.LoadScene(0);
 	}
 }
