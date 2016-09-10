@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class Player : MonoBehaviour {
 
-	public float timeDuration = 1.0f;
+	public float initStepDuration = 1.0f;
 	public float timer = 0.0f;
 
 	List<int> initiative = new List<int>();
@@ -27,23 +27,32 @@ public class Player : MonoBehaviour {
 	public float fastMultiplier = 1.0f;
 	public float trickyMultiplier = 0.5f;
 
+	GameObject goSymbol;
+	GameObject waitSymbol;
+
+	const float INIT_START_X_COORD = 2.75f;
+	const float INIT_Y_COORD = 0.0f;
+	const float INIT_Z_COORD = 0.0f;
+
 	void Start()
 	{
 		playerNum = AssignPlayerNum();
 		initiative = StockInitiative();
+		goSymbol = Resources.Load("Prefabs/Green") as GameObject;
+		waitSymbol = Resources.Load("Prefabs/Yellow") as GameObject;
 	}
 
-	//determine whether this is player 1 or player 2
+	//determine whether this is player 1 or player 2, set values accordingly
 	//IMPORTANT: this assumes that player names are in the format "Player #"
 	int AssignPlayerNum()
 	{
 		switch(gameObject.name[7])
 		{
 			case '1':
-				return 2;
+				return 1;
 				break;
 			case '2':
-				return 1;
+				return 2;
 				break;
 			default:
 				Debug.Log("Illegal player number: " + gameObject.name[7]);
@@ -85,8 +94,8 @@ public class Player : MonoBehaviour {
 
 		foreach (Transform initiativeMarker in initHierarchy)
 		{
-			if (initiativeMarker.name.Contains("green")) { temp.Add(1); }
-			else if (initiativeMarker.name.Contains("yellow")) { temp.Add(2); }
+			if (initiativeMarker.name.Contains("Green")) { temp.Add(1); }
+			else if (initiativeMarker.name.Contains("Yellow")) { temp.Add(2); }
 			else { Debug.Log("Illegal initiative marker: " + initiativeMarker.name); }
 		}
 
@@ -97,7 +106,7 @@ public class Player : MonoBehaviour {
 	{
 		timer += Time.deltaTime;
 
-		if (timer >= timeDuration)
+		if (timer >= initStepDuration)
 		{
 			ResolveNextInitiative();
 			timer = 0.0f;
@@ -132,66 +141,124 @@ public class Player : MonoBehaviour {
 	{
 		if (Input.GetKeyDown(strong))
 		{
-			switch(playerNum)
-			{
-				case 1:
-					transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
-						.GetComponent<Health>().HealthFill -= baseDamage * strongMultiplier;;
-					break;
-				case 2:
-					transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
-						.GetComponent<Health>().HealthFill -= baseDamage * fastMultiplier;
-					break;
-				default:
-					Debug.Log("Illegal player number: " + playerNum);
-					break;
-			}
-		
-			initiative.Add(2);
+			StrongEffects();
+			AddToInitiativeList(2);
 			PostAttackReset();
 		}
 		else if (Input.GetKeyDown(fast))
 		{
-			switch(playerNum)
-			{
-				case 1:
-					transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
-						.GetComponent<Health>().HealthFill -= baseDamage * fastMultiplier;
-					break;
-				case 2:
-					transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
-						.GetComponent<Health>().HealthFill -= baseDamage * fastMultiplier;
-					break;
-				default:
-					Debug.Log("Illegal player number: " + playerNum);
-					break;
-			}
-				
-			initiative.Add(1);
+			FastEffects();	
 			PostAttackReset();
 		}
 		else if (Input.GetKeyDown(tricky))
 		{
-			switch(playerNum)
-			{
-				case 1:
-					transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
-						.GetComponent<Health>().HealthFill -= baseDamage * trickyMultiplier;
-					transform.root.Find("Players").Find("Player 2").GetComponent<Player>().Initiative.Add(2);
-					break;
-				case 2:
-					transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
-						.GetComponent<Health>().HealthFill -= baseDamage * trickyMultiplier;
-					transform.root.Find("Players").Find("Player 1").GetComponent<Player>().Initiative.Add(2);
-					break;
-				default:
-					Debug.Log("Illegal player number: " + playerNum);
-					break;
-			}
-				
-			initiative.Add(1);
+			TrickyEffects();
 			PostAttackReset();
 		}
+	}
+
+	void StrongEffects()
+	{
+		switch(playerNum)
+		{
+			case 1:
+				transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
+					.GetComponent<Health>().HealthFill -= baseDamage * strongMultiplier;;
+				break;
+			case 2:
+				transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
+					.GetComponent<Health>().HealthFill -= baseDamage * strongMultiplier;
+				break;
+			default:
+				Debug.Log("Illegal player number: " + playerNum);
+				break;
+		}
+	}
+
+	void FastEffects()
+	{
+		switch(playerNum)
+		{
+		case 1:
+			transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
+				.GetComponent<Health>().HealthFill -= baseDamage * fastMultiplier;
+			break;
+		case 2:
+			transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
+				.GetComponent<Health>().HealthFill -= baseDamage * fastMultiplier;
+			break;
+		default:
+			Debug.Log("Illegal player number: " + playerNum);
+			break;
+		}
+
+		initiative.Add(1);
+	}
+
+	void TrickyEffects()
+	{
+		switch(playerNum)
+		{
+			case 1:
+				transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
+					.GetComponent<Health>().HealthFill -= baseDamage * trickyMultiplier;
+				transform.root.Find("Players").Find("Player 2").GetComponent<Player>().Initiative.Add(2);
+				break;
+			case 2:
+				transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
+					.GetComponent<Health>().HealthFill -= baseDamage * trickyMultiplier;
+				transform.root.Find("Players").Find("Player 1").GetComponent<Player>().Initiative.Add(2);
+				break;
+			default:
+				Debug.Log("Illegal player number: " + playerNum);
+				break;
+		}
+
+		initiative.Add(1);
+	}
+
+	void AddToInitiativeList(int whatToAdd)
+	{
+		initiative.Add(whatToAdd);
+
+		Transform initList = transform.root.Find("Initiative lists").Find("P" + playerNum.ToString());
+		GameObject newSymbol = null;
+
+		switch(playerNum)
+		{
+			case 1:
+				if (whatToAdd == 1) { newSymbol = Instantiate(goSymbol,
+															  new Vector3(-INIT_START_X_COORD - initList.childCount,
+																   		  INIT_Y_COORD,
+																		  INIT_Z_COORD),
+															  Quaternion.identity) as GameObject; }
+				else if (whatToAdd == 2) { newSymbol = Instantiate(waitSymbol,
+															  new Vector3(-INIT_START_X_COORD - initList.childCount,
+																			   INIT_Y_COORD,
+																			   INIT_Z_COORD),
+																   Quaternion.identity) as GameObject; }
+				else { Debug.Log("Illegal whatToAdd: " + whatToAdd.ToString()); }
+				break;
+			case 2:
+				if (whatToAdd == 1) { newSymbol = Instantiate(goSymbol,
+															  new Vector3(INIT_START_X_COORD + initList.childCount,
+																		  INIT_Y_COORD,
+																		  INIT_Z_COORD),
+															  Quaternion.identity) as GameObject; }
+				else if (whatToAdd == 2) { newSymbol = Instantiate(waitSymbol,
+															  new Vector3(INIT_START_X_COORD + initList.childCount,
+																			   INIT_Y_COORD,
+																			   INIT_Z_COORD),
+																   Quaternion.identity) as GameObject; }
+				else { Debug.Log("Illegal whatToAdd: " + whatToAdd.ToString()); }
+				break;
+			default:
+				Debug.Log("Illegal playerNum: " + playerNum.ToString());
+				break;
+
+		}
+
+		newSymbol.transform.parent = initList;
 	}
 
 	void PostAttackReset()
