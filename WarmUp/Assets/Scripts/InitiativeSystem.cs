@@ -61,7 +61,7 @@ public class InitiativeSystem : MonoBehaviour {
 		if (p1CanAct) { ListenForInput(1); }
 		if (p2CanAct) { ListenForInput(2); }
 
-		TowardNextInitStep();
+		//TowardNextInitStep();
 	}
 
 	void ListenForInput(int playerNum)
@@ -74,18 +74,21 @@ public class InitiativeSystem : MonoBehaviour {
 					InflictDamage(1, 2, strongMultiplier);
 					AddInitSymbol(1, "Strong");
 					SetReadiness(1, false);
+					ResolveNextInit();
 				}
 				else if (Input.GetKeyDown(p1Fast))
 				{
 					InflictDamage(1, 2, fastMultiplier);
 					AddInitSymbol(1 , "Fast");
 					SetReadiness(1, false);
+					ResolveNextInit();
 				}
 				else if (Input.GetKeyDown(p1Tricky))
 				{
 					TrickyEffects(1, 2, trickyMultiplier);
 					AddInitSymbol(1, "Tricky");
 					SetReadiness(1, false);
+					ResolveNextInit();
 				}
 				break;
 			case 2:
@@ -94,18 +97,21 @@ public class InitiativeSystem : MonoBehaviour {
 					InflictDamage(2, 1, strongMultiplier);
 					AddInitSymbol(2, "Strong");
 					SetReadiness(2, false);
+					ResolveNextInit();
 				}
 				else if (Input.GetKeyDown(p2Fast))
 				{
 					InflictDamage(2, 1, fastMultiplier);
 					AddInitSymbol(2, "Fast");
 					SetReadiness(2, false);
+					ResolveNextInit();
 				}
 				else if (Input.GetKeyDown(p2Tricky))
 				{
 					TrickyEffects(2, 1, trickyMultiplier);
 					AddInitSymbol(2, "Tricky");
 					SetReadiness(2, false);
+					ResolveNextInit();
 				}
 				break;
 			default:
@@ -240,6 +246,8 @@ public class InitiativeSystem : MonoBehaviour {
 
 			Destroy(initList.GetChild(0).gameObject);
 		}
+
+		RepositionSymbols();
 	}
 
 	void SetReadiness(int player, bool state)
