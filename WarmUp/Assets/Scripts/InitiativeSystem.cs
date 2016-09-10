@@ -1,0 +1,233 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class InitiativeSystem : MonoBehaviour {
+
+	public float initStepDuration = 1.0f;
+	float timer = 0.0f;
+	Transform initList;
+	GameObject p1InitSymbol;
+	GameObject p2InitSymbol;
+
+	const float INIT_X_POS = 0.0f;
+	const float INIT_Y_START_POS = -3.15f;
+	const float INIT_Z_POS = 0.0f;
+
+	bool p1CanAct = true;
+	bool p2CanAct = true;
+
+	Health p1Health;
+	Health p2Health;
+
+
+	public KeyCode p1Strong = KeyCode.Q;
+	public KeyCode p1Fast = KeyCode.W;
+	public KeyCode p1Tricky = KeyCode.E;
+	public KeyCode p2Strong = KeyCode.I;
+	public KeyCode p2Fast = KeyCode.O;
+	public KeyCode p2Tricky = KeyCode.P;
+
+	public float baseDamage = 0.1f;
+	public float strongMultiplier = 3.0f;
+	public float fastMultiplier = 1.0f;
+	public float trickyMultiplier = 0.0f;
+
+
+
+	void Start()
+	{
+		p1InitSymbol = Resources.Load("Prefabs/Green") as GameObject;
+		p2InitSymbol = Resources.Load("Prefabs/Yellow") as GameObject;
+
+		p1Health = transform.root.Find("Players").Find("Player 1").Find("Health meter").Find("Health image")
+			.GetComponent<Health>();
+		p2Health = transform.root.Find("Players").Find("Player 2").Find("Health meter").Find("Health image")
+			.GetComponent<Health>();
+
+		initList = transform.root.Find("Initiative list");
+	}
+
+	void Update()
+	{
+		if (p1CanAct) { ListenForInput(1); }
+		if (p2CanAct) { ListenForInput(2); }
+
+		TowardNextInitStep();
+	}
+
+	void ListenForInput(int playerNum)
+	{
+		switch (playerNum)
+		{
+			case 1:
+				if (Input.GetKeyDown(p1Strong))
+				{
+					InflictDamage(1, 2, strongMultiplier);
+					AddInitSymbol(1, "Strong");
+					p1CanAct = false;
+				}
+				else if (Input.GetKeyDown(p1Fast))
+				{
+					InflictDamage(1, 2, fastMultiplier);
+					AddInitSymbol(1 , "Fast");
+					p1CanAct = false;
+				}
+				else if (Input.GetKeyDown(p1Tricky))
+				{
+					TrickyEffects(1, 2, trickyMultiplier);
+					AddInitSymbol(1, "Tricky");
+					p1CanAct = false;
+				}
+				break;
+			case 2:
+				if (Input.GetKeyDown(p2Strong))
+				{
+					InflictDamage(2, 1, strongMultiplier);
+					AddInitSymbol(2, "Strong");
+					p2CanAct = false;
+				}
+				else if (Input.GetKeyDown(p2Fast))
+				{
+					InflictDamage(2, 1, fastMultiplier);
+					AddInitSymbol(2, "Fast");
+					p2CanAct = false;
+				}
+				else if (Input.GetKeyDown(p2Tricky))
+				{
+					TrickyEffects(2, 1, trickyMultiplier);
+					AddInitSymbol(2, "Tricky");
+					p2CanAct = false;
+				}
+				break;
+			default:
+				Debug.Log("Illegal playerNum: " + playerNum);
+				break;
+		}
+	}
+
+	void InflictDamage(int attacker, int defender, float multiplier)
+	{
+		switch (attacker)
+		{
+			case 1:
+				p2Health.HealthFill -= baseDamage * multiplier;
+				p1CanAct = false;
+				break;
+			case 2:
+				p1Health.HealthFill -= baseDamage * multiplier;
+				p2CanAct = false;
+				break;
+			default:
+				Debug.Log("Illegal attacker: " + attacker);
+				break;
+		}
+	}
+		
+	void TrickyEffects(int attacker, int defender, float multiplier)
+	{
+		switch (attacker)
+		{
+			case 1:
+				p1CanAct = false;
+				GoToEndOfLine("Yellow");
+				break;
+			case 2:
+				p2CanAct = false;
+				GoToEndOfLine("Green");
+				break;
+			default:
+				Debug.Log("Illegal attacker: " + attacker);
+				break;
+		}
+	}
+
+	void GoToEndOfLine(string target)
+	{
+		foreach (Transform symbol in initList)
+		{
+			if (symbol.name.Contains(target))
+			{
+				symbol.SetAsLastSibling();
+				RepositionSymbols();
+			}
+		}
+	}
+
+	/*
+	 * 
+	 * Strong attacks add one of a player's symbols to the initiative list
+	 * Fast attacks add two
+	 * Tricky attacks add none (but note the TrickyEffects() method)
+	 * 
+	 */
+	void AddInitSymbol(int player, string attackType)
+	{
+		switch(attackType)
+		{
+			case "Strong":
+				if (player == 1) { CreateInitSymbol(1); }
+				else if (player == 2) { CreateInitSymbol(2); }
+				else { Debug.Log("Illegal player: " + player); }
+				break;
+			case "Fast":
+				if (player == 1) { CreateInitSymbol(1); CreateInitSymbol(1); }
+				else if (player == 2) { CreateInitSymbol(2); CreateInitSymbol(2); }
+				else { Debug.Log("Illegal player: " + player); }
+				break;
+			case "Tricky":
+				break;
+		}
+
+		RepositionSymbols();
+	}
+
+	void CreateInitSymbol(int playerNum)
+	{
+		GameObject newSymbol;
+
+		switch (playerNum)
+		{
+			case 1:
+				newSymbol = Instantiate(p1InitSymbol, initList) as GameObject;
+				break;
+			case 2:
+				newSymbol = Instantiate(p2InitSymbol, initList) as GameObject;
+				break;
+			default:
+				Debug.Log("Illegal playernum: " + playerNum);
+				break;
+		}
+	}
+
+	void RepositionSymbols()
+	{
+		for (int i = 0; i < initList.childCount; i++)
+		{
+			initList.GetChild(i).transform.localPosition = new Vector3(INIT_X_POS,
+																	   INIT_Y_START_POS + i,
+																	   INIT_Z_POS);
+		}
+	}
+
+	void TowardNextInitStep()
+	{
+		timer += Time.deltaTime;
+
+		if (timer >= initStepDuration)
+		{
+			ResolveNextInit();
+			timer = 0.0f;
+		}
+	}
+
+	//allow either p1 or p2 to act, depending on who's symbol is next in the initiative list
+	//then clear the symbol
+	void ResolveNextInit()
+	{
+		if (initList.GetChild(0).name.Contains("Green")) { p1CanAct = true; }
+		else if (initList.GetChild(0).name.Contains("Yellow")) { p2CanAct = true; }
+
+		Destroy(initList.GetChild(0).gameObject);
+	}
+}
