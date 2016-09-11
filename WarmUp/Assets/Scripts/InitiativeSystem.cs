@@ -68,6 +68,8 @@ public class InitiativeSystem : MonoBehaviour {
 			.GetComponent<Health>();
 
 		initList = transform.root.Find("Initiative list");
+
+		SetReadiness(2, false);
 	}
 
 	void Update()
@@ -233,8 +235,10 @@ public class InitiativeSystem : MonoBehaviour {
 	{
 		for (int i = 0; i < initList.childCount; i++)
 		{
+			//the awkward y position here reflects the fact that the to-be-destroyed symbol will still be present
+			//until the end of the frame; the -1 corrects for it
 			initList.GetChild(i).transform.localPosition = new Vector3(INIT_X_POS,
-																	   INIT_Y_START_POS + i,
+																	   INIT_Y_START_POS + i - 1,
 																	   INIT_Z_POS);
 		}
 	}
@@ -243,12 +247,12 @@ public class InitiativeSystem : MonoBehaviour {
 	//then clear the symbol
 	void ResolveNextInit()
 	{
-		if (initList.childCount > 0)
-		{
-			if (initList.GetChild(0).name.Contains("Green")) { SetReadiness(1, true); }
-			else if (initList.GetChild(0).name.Contains("Yellow")) { SetReadiness(2, true); }
+		if (initList.childCount > 0) { Destroy(initList.GetChild(0).gameObject); }
 
-			Destroy(initList.GetChild(0).gameObject);
+		if (initList.childCount > 1) //the Destroy() method resolved at end of frame, so previous symbol isn't gone yet
+		{
+			if (initList.GetChild(1).name.Contains("Green")) { SetReadiness(1, true); }
+			else if (initList.GetChild(1).name.Contains("Yellow")) { SetReadiness(2, true); }
 		}
 
 		RepositionSymbols();
