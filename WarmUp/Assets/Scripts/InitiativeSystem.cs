@@ -157,19 +157,44 @@ public class InitiativeSystem : MonoBehaviour {
 		
 	void TrickyEffects(int attacker, int defender, float multiplier)
 	{
+		Debug.Log("TrickyEffects() called");
 		switch (attacker)
 		{
 			case 1:
 				SetReadiness(1, false);
-				GoToEndOfLine("Yellow");
+				//GoToEndOfLine("Yellow");
+				SwapInitSymbols("Yellow");
 				break;
 			case 2:
 				SetReadiness(2, false);
-				GoToEndOfLine("Green");
+				//GoToEndOfLine("Green");
+				SwapInitSymbols("Green");
 				break;
 			default:
 				Debug.Log("Illegal attacker: " + attacker);
 				break;
+		}
+	}
+
+	void SwapInitSymbols(string target)
+	{
+		foreach (Transform symbol in initList)
+		{
+			if (symbol.name.Contains(target))
+			{
+				if (symbol.GetSiblingIndex() < initList.childCount - 1) //if this isn't the last item in the hierarchy
+				{
+					Debug.Log(symbol.name + " is at " + symbol.GetSiblingIndex());
+
+					int temp = symbol.GetSiblingIndex();
+					initList.GetChild(temp + 1).SetSiblingIndex(temp);
+					symbol.SetSiblingIndex(temp + 1);
+
+					Debug.Log(symbol.name + " is at " + symbol.GetSiblingIndex());
+					RepositionSymbols();
+					break;
+				}
+			}
 		}
 	}
 
