@@ -17,7 +17,6 @@ public class Health : MonoBehaviour {
 		{
 			healthFill = value;
 			healthImage.fillAmount = healthFill;
-			Debug.Log(healthFill);
 			if (healthFill <= 0.0f) { LoseGame(); }
 		}
 	}
