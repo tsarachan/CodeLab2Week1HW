@@ -52,6 +52,8 @@ public class InitiativeSystem : MonoBehaviour {
 	bool gameOver = false;
 	public bool GameOver { get; set; }
 
+	AudioManager audioManager;
+
 	void Start()
 	{
 		p1InitSymbol = Resources.Load("Prefabs/Green") as GameObject;
@@ -68,6 +70,8 @@ public class InitiativeSystem : MonoBehaviour {
 			.GetComponent<Health>();
 
 		initList = transform.root.Find("Initiative list");
+
+		audioManager = GetComponent<AudioManager>();
 
 		SetReadiness(2, false);
 	}
@@ -91,6 +95,7 @@ public class InitiativeSystem : MonoBehaviour {
 					InflictDamage(1, 2, strongMultiplier);
 					AddInitSymbol(1, "Strong");
 					SetReadiness(1, false);
+					audioManager.PlayClip("Strong");
 					ResolveNextInit();
 				}
 				else if (Input.GetKeyDown(p1Fast))
@@ -98,6 +103,7 @@ public class InitiativeSystem : MonoBehaviour {
 					InflictDamage(1, 2, fastMultiplier);
 					AddInitSymbol(1 , "Fast");
 					SetReadiness(1, false);
+					audioManager.PlayClip("Fast");
 					ResolveNextInit();
 				}
 				else if (Input.GetKeyDown(p1Tricky))
@@ -105,6 +111,7 @@ public class InitiativeSystem : MonoBehaviour {
 					TrickyEffects(1, 2, trickyMultiplier);
 					AddInitSymbol(1, "Tricky");
 					SetReadiness(1, false);
+					audioManager.PlayClip("Tricky");
 					ResolveNextInit();
 				}
 				break;
@@ -114,6 +121,7 @@ public class InitiativeSystem : MonoBehaviour {
 					InflictDamage(2, 1, strongMultiplier);
 					AddInitSymbol(2, "Strong");
 					SetReadiness(2, false);
+					audioManager.PlayClip("Strong");
 					ResolveNextInit();
 				}
 				else if (Input.GetKeyDown(p2Fast))
@@ -121,6 +129,7 @@ public class InitiativeSystem : MonoBehaviour {
 					InflictDamage(2, 1, fastMultiplier);
 					AddInitSymbol(2, "Fast");
 					SetReadiness(2, false);
+					audioManager.PlayClip("Fast");
 					ResolveNextInit();
 				}
 				else if (Input.GetKeyDown(p2Tricky))
@@ -128,6 +137,7 @@ public class InitiativeSystem : MonoBehaviour {
 					TrickyEffects(2, 1, trickyMultiplier);
 					AddInitSymbol(2, "Tricky");
 					SetReadiness(2, false);
+					audioManager.PlayClip("Tricky");
 					ResolveNextInit();
 				}
 				break;
@@ -157,7 +167,6 @@ public class InitiativeSystem : MonoBehaviour {
 		
 	void TrickyEffects(int attacker, int defender, float multiplier)
 	{
-		Debug.Log("TrickyEffects() called");
 		switch (attacker)
 		{
 			case 1:
@@ -184,8 +193,6 @@ public class InitiativeSystem : MonoBehaviour {
 			{
 				if (symbol.GetSiblingIndex() < initList.childCount - 1) //if this isn't the last item in the hierarchy
 				{
-					Debug.Log(symbol.name + " is at " + symbol.GetSiblingIndex());
-
 					int temp = symbol.GetSiblingIndex();
 					initList.GetChild(temp + 1).SetSiblingIndex(temp);
 					symbol.SetSiblingIndex(temp + 1);
@@ -232,6 +239,9 @@ public class InitiativeSystem : MonoBehaviour {
 				else { Debug.Log("Illegal player: " + player); }
 				break;
 			case "Tricky":
+				break;
+			default:
+				Debug.Log("Illegal attackType: " + attackType);
 				break;
 		}
 
